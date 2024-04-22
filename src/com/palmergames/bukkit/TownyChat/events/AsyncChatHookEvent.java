@@ -5,6 +5,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.Bukkit;
+
+import org.geysermc.floodgate.api.FloodgateApi;
+import com.github.ucchyocean.lc3.LunaChatAPI;
+import com.github.ucchyocean.lc3.LunaChatBukkit;
+import com.github.ucchyocean.lc3.japanize.JapanizeType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -68,7 +74,20 @@ public class AsyncChatHookEvent extends Event {
 	}
 	
 	public String getMessage() {
-		return event.getMessage();
+		String message = event.getMessage();
+		FloodgateApi floodgateApi = FloodgateApi.getInstance();
+		LunaChatAPI lunachatapi = ((LunaChatBukkit) Bukkit.getServer().getPluginManager().getPlugin("LunaChat")).getLunaChatAPI();
+		String sourceLanguage = "";
+		if (floodgateApi.isFloodgatePlayer(event.getPlayer().getUniqueId())) {
+			sourceLanguage = floodgateApi.getPlayer(event.getPlayer().getUniqueId()).getLanguageCode();
+		} else {
+			sourceLanguage = event.getPlayer().getLocale();
+		}
+		if (sourceLanguage.contains("ja_JP")) {
+			return lunachatapi.japanize(message, JapanizeType.GOOGLE_IME);
+		}else{
+			return event.getMessage();
+		}
 	}
 	
 	public Set<Player> getRecipients() {
