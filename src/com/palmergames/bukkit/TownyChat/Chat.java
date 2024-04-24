@@ -38,6 +38,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.palmergames.bukkit.TownyChat.listener.SettingsPacketListener;
+
 /**
  * Chat plugin to manage all Towny chat
  * 
@@ -89,6 +93,10 @@ public class Chat extends JavaPlugin {
 			disableWithMessage("The config could not be loaded.");
 			return;
 		}
+		
+        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        Plugin plugin = getServer().getPluginManager().getPlugin("TownyChat");
+        protocolManager.addPacketListener(new SettingsPacketListener(plugin));
 		
 		/*
 		 * This executes the task with a 1 tick delay avoiding the bukkit depends bug.

@@ -33,6 +33,11 @@ import com.github.ucchyocean.lc3.japanize.JapanizeType;
 import org.bukkit.Bukkit;
 import java.nio.charset.StandardCharsets;
 
+import java.util.UUID;
+import com.palmergames.bukkit.TownyChat.listener.SettingsPacketListener;
+import java.util.HashMap;
+import java.util.Map;
+
 public class TownyChatPlayerListener implements Listener  {
 	private Chat plugin;
 	
@@ -86,17 +91,19 @@ public class TownyChatPlayerListener implements Listener  {
 		LunaChatAPI lunachatapi = ((LunaChatBukkit) Bukkit.getServer().getPluginManager().getPlugin("LunaChat")).getLunaChatAPI();
 		String sourceLanguage = "";
 		if (floodgateApi.isFloodgatePlayer(event.getPlayer().getUniqueId())) {
-			sourceLanguage = floodgateApi.getPlayer(event.getPlayer().getUniqueId()).getLanguageCode();
+			sourceLanguage = floodgateApi.getPlayer(event.getPlayer().getUniqueId()).getLanguageCode().toLowerCase();
 		} else {
-			sourceLanguage = event.getPlayer().getLocale();
+			Map<UUID, String> playerLocales = SettingsPacketListener.getPlayerLocales();
+			sourceLanguage = playerLocales.get(event.getPlayer().getUniqueId());
 		}
 
-		if (sourceLanguage.toLowerCase().contains("ja_jp") && !event.getMessage().startsWith("$") && lunachatapi.isPlayerJapanize(event.getPlayer().getName()) && !skipJapanize) {
+		if (sourceLanguage == "ja_jp" && !event.getMessage().startsWith("$") && lunachatapi.isPlayerJapanize(event.getPlayer().getName()) && !skipJapanize) {
 			String japanizedMessage = event.getMessage(); // メッセージを取得
-			if (japanizedMessage.startsWith("$")) { // メッセージが$で始まる場合
-				japanizedMessage = japanizedMessage.substring(1); // 先頭の$を削除
-			}
 			event.setMessage(lunachatapi.japanize(japanizedMessage, JapanizeType.GOOGLE_IME)); // 日本語化したメッセージをセット
+		}
+
+		if (event.getMessage().startsWith("$")) { // メッセージが$で始まる場合
+			event.setMessage(event.getMessage().substring(1)); // 先頭の$を削除
 		}
 
 		// Check if the message contains colour codes we need to remove or parse.
